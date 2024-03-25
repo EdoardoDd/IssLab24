@@ -1,0 +1,61 @@
+System helloworld0
+
+Dispatch info : info(N) "Informazione inviata dal worker(prod)"
+Request req : req(N)	"Richiesta inviata dal worker(prod)"
+Reply rep : rep(R)		"Risposta inviata dal display(cons)"
+
+Context ctxhello ip [host="localhost" port=8000] 
+ 
+//prod
+QActor worker context ctxhello{
+	State s0 initial{
+		println("$name START prod") color magenta
+		printCurrentMessage
+		forward display -m info : info(10) 
+		request display -m req : req(30)
+		request display -m req : req(40)
+		
+	}
+	
+	Transition t0 whenReply rep -> handlRep
+	State handlRep{
+		onMsg( rep : rep(N)){
+			println("$name Ricevuta reply ${payloadArg(0)}") color green
+		}		
+	}
+	Transition t0 whenReply rep -> handlRep
+	
+} 
+
+
+//cons
+QActor display context ctxhello{
+	State s0 initial{
+		printCurrentMessage
+		println("$name START cons") color magenta
+	}	
+	
+	Transition t0 whenMsg info -> handleInfo
+	whenRequest req -> handleReq
+	
+	State handleInfo{
+		printCurrentMessage
+		onMsg( info :info(N)){
+			println("$name Cons ${payloadArg(0)}") color green
+		}
+	}
+	
+	Transition t0 whenMsg info -> handleInfo
+	whenRequest req -> handleReq
+	
+	State handleReq {
+		printCurrentMessage
+		onMsg( req : req(R)){
+			println("$name Cons ${payloadArg(0)}") color yellow
+			replyTo req with rep : rep(30)	
+		}
+	}	
+	
+	Transition t0 whenMsg info -> handleInfo
+	whenRequest req -> handleReq
+}

@@ -1,0 +1,49 @@
+System prodcons24_consumer
+ 
+Request  distance : distance(D)
+Reply distanceack : ack(D) for distance
+     
+
+//Context ctxping  ip [host="localhost" port=8014]  
+Context ctxpong  ip [host="localhost" port=8015]
+
+//ExternalQActor ping context ctxping      
+  
+QActor pong context ctxpong {    
+	State s0 initial{  
+		println("$name STARTS") color magenta
+	}
+	Transition t0 whenRequest distance -> handleRequest
+	
+	State handleRequest{
+		printCurrentMessage color yellow
+		onMsg( distance : distance(D)){
+			replyTo distance with distanceack : ack( from_pong )
+		}		  
+	}  
+	Transition t0 whenRequest distance -> handleRequest
+	
+}    
+
+
+
+//QActor ping context ctxpong { 
+//	State s0 initial{  
+//		println("$name STARTS") color magenta
+//		delay 500  
+//		request pong -m distance : distance(from_ping)
+//	} 
+//	Transition t0 whenReply distanceack -> handleReply
+//
+//	
+//	State handleReply{
+//		println("----------") color green
+//		delay 1000
+//		printCurrentMessage color yellow
+//		onMsg( distanceack : ack(D)){
+//			request pong -m distance : distance(from_ping)
+//		}		 
+//	}
+//	Transition t0 whenReply distanceack -> handleReply
+//}
+

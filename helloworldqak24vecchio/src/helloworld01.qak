@@ -1,0 +1,38 @@
+System helloworld0
+
+// Mettiamo dispatch prima dei contesti, questo perché sarà comune a tutti i context
+Dispatch info : info(N) "Informazione inviata dal worker"
+//        id    payload
+
+Context ctxhello ip [host="localhost" port=8000] 
+
+QActor worker context ctxhello{
+	State s0 initial{
+		println("Hello world") color magenta
+		printCurrentMessage
+		[# CommUtils.outblue("Hello world again") #]
+		forward display -m info : info(10) 
+		forward display -m info : info(20) 
+	}
+}     
+   
+ 
+QActor display context ctxhello{
+	State s0 initial{
+		println("$name START") color blue
+		
+	}	
+	Transition t0 whenMsg info -> handleInfo
+	
+	State handleInfo{
+		printCurrentMessage
+		onMsg( info :info(N)){
+			println("$name ${payloadArg(0)}") color green
+		}
+	}
+	
+		Transition t0 whenMsg info -> handleInfo
+	
+	
+	
+}
